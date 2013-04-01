@@ -1,5 +1,4 @@
 var munch = (function(circle) {
-  //
   var o = {};
   var circle = {};
   var subCircles = [];
@@ -33,15 +32,19 @@ var munch = (function(circle) {
 
     // draw sub-circles
     for (var i = 0; i < subCircles.length; i++) {
+
+      // calculate the center of the sub-circle
+      var x = canvasWidth/2 + subCircles[i].coordinates.x * space;
+      var y = canvasHeight/2 + subCircles[i].coordinates.y * space;
+
       ctx.beginPath();
-      ctx.arc(canvasWidth/2 + subCircles[i].coordinates.x * space,
-              canvasHeight/2 + subCircles[i].coordinates.y * space,
-              subCircles[i].radius,
-              0, 
-              Math.PI*2
-      );
+      ctx.arc(x, y, subCircles[i].radius, 0, Math.PI*2);
       ctx.fillStyle = subCircles[i].color;
       ctx.fill();
+
+      // add x and y coordinates for the click event
+      subCircles[i].x = x;
+      subCircles[i].y = y;
     }
   }
 
@@ -49,6 +52,14 @@ var munch = (function(circle) {
     var color = 'seagreen';
     var radius = '30';
     return { 'color': color, 'radius': radius};
+  }
+
+  function clickEvent(e) {
+    for (var i = 0; i < subCircles.length; i++) {
+      var circle = subCircles[i];
+      if (e.offs)
+      console.log(circle.x);
+    }
   }
 
   o.start = function() {
@@ -60,6 +71,9 @@ var munch = (function(circle) {
     }
     circle = createCircle();
     draw();
+
+    var canvas = document.getElementById("munchCanvas");
+    canvas.addEventListener("click", clickEvent);
   };
 
   return o;
