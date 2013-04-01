@@ -1,12 +1,12 @@
-var munch = (function(circle) {
+var munch = (function() {
   var o = {};
-  var circle = {};
-  var subCircles = [];
+  var mainCircle;
+  var subCircles;
   var canvasWidth = 600;
   var canvasHeight = 600;
   
   // space between circles
-  var space = 80;
+  var space = 120;
 
   // placement for sub-circles
   var coordinates = [
@@ -23,11 +23,15 @@ var munch = (function(circle) {
   function draw() {
     var canvas = document.getElementById("munchCanvas");
     var ctx = canvas.getContext("2d");
+
+    // reset canvas
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0,0,canvas.width, canvas.height);
     
     // draw main circle
     ctx.beginPath();
-    ctx.arc(canvasWidth/2, canvasHeight/2, circle.radius, 0, Math.PI*2);
-    ctx.fillStyle = circle.color;
+    ctx.arc(canvasWidth/2, canvasHeight/2, mainCircle.radius, 0, Math.PI*2);
+    ctx.fillStyle = mainCircle.color;
     ctx.fill();
 
     // draw sub-circles
@@ -49,27 +53,46 @@ var munch = (function(circle) {
   }
 
   function createCircle() {
-    var color = 'seagreen';
-    var radius = '30';
+    var niceColors = ['#24CA61', '#24CAB4', '#248DCA', '#243ACA', '#6124CA', '#B424CA', '#CA248D', '#CA243A', '#CA6124', '#CAB424', '#8DCA24', '#3ACA24'];
+    var color = niceColors[getRandomInt(0, niceColors.length - 1)]
+    var radius = getRandomInt(25, 45);
     return { 'color': color, 'radius': radius};
   }
 
   function clickEvent(e) {
     for (var i = 0; i < subCircles.length; i++) {
       var circle = subCircles[i];
-      if (e.offs)
-      console.log(circle.x);
+      
+      // calculate the distance between center of circle and clicked point
+      var a = Math.pow( Math.abs( circle.x - e.offsetX ), 2 );
+      var b = Math.pow( Math.abs( circle.y - e.offsetY ), 2 );
+      var distance = Math.sqrt( a + b );
+
+      if (distance < circle.radius) {
+        o.start(circle);
+        break;
+      }
     }
   }
 
-  o.start = function() {
+  function getRandomInt (min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  o.start = function(circle) {
+    if (circle) mainCircle = circle;
+    else mainCircle = createCircle();
     
-    for (var i = 0; i < coordinates.length; i++) {
+    // reset
+    subCircles = [];
+
+    var numberOfCircles = getRandomInt(1, 8);
+    for (var i = 0; i < numberOfCircles; i++) {
       var subCircle = createCircle();
       subCircle.coordinates = coordinates[i];
       subCircles.push(subCircle);
     }
-    circle = createCircle();
+
     draw();
 
     var canvas = document.getElementById("munchCanvas");
